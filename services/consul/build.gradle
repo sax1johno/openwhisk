@@ -1,3 +1,0 @@
-ext.dockerImageName = 'whisk/consul'
-apply from: '../../docker.gradle'
-distDocker.dependsOn ':common:scala:distDocker'

@@ -1,24 +1,20 @@
-FROM ubuntu:14.04
+# Licensed to the Apache Software Foundation (ASF) under one or more contributor
+# license agreements; and to You under the Apache License, Version 2.0.
 
-ENV DEBIAN_FRONTEND noninteractive
+FROM adoptopenjdk/openjdk8:x86_64-alpine-jdk8u172-b11
 
-# Expose standard ports
-EXPOSE 8080
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
 
-# Initial update and some basics.
-# Get Java 8
-# Install Scala
-RUN apt-get update --fix-missing && \
-  apt-get install -y wget && \
-  apt-get update  && \
-  apt-get install -y curl  && \
-  apt-get install -y software-properties-common && \
-  add-apt-repository -y ppa:webupd8team/java && \
-  apt-get update -y && \
-  echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections && \
-  apt-get install -y oracle-java8-installer && \
-  wget www.scala-lang.org/files/archive/scala-2.11.6.deb && \
-  dpkg -i scala-2.11.6.deb && \
-  apt-get install -y scala && \
-  rm scala-2.11.6.deb && \
-  mkdir /logs
+# Switch to the HTTPS endpoint for the apk repositories as per https://github.com/gliderlabs/docker-alpine/issues/184
+RUN sed -i 's/http\:\/\/dl-cdn.alpinelinux.org/https\:\/\/alpine.global.ssl.fastly.net/g' /etc/apk/repositories
+RUN apk add --update sed curl bash && apk update && apk upgrade
+
+RUN mkdir /logs
+
+COPY transformEnvironment.sh /
+RUN chmod +x transformEnvironment.sh
+
+COPY copyJMXFiles.sh /
+RUN chmod +x copyJMXFiles.sh
